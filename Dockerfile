@@ -1,10 +1,23 @@
 # Imagen base con PHP 8.2 + Apache
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias
+# Instalar dependencias del sistema Y git (importante)
 RUN apt-get update && apt-get install -y \
-    git zip unzip libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip
+    git \
+    curl \
+    zip \
+    unzip \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar extensiones PHP
+RUN docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    zip \
+    xml
 
 # Habilitar mod_rewrite para Laravel
 RUN a2enmod rewrite
@@ -12,20 +25,20 @@ RUN a2enmod rewrite
 # Carpeta de trabajo
 WORKDIR /var/www/html
 
-# Copiar archivos del proyecto al contenedor
+# Copiar archivos del proyecto
 COPY . .
 
-# Instalar Composer
+# Instalar Composer (descargar versión más reciente)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Instalar dependencias PHP
+# Instalar dependencias PHP con Composer
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Instalar dependencias Node y compilar assets
 RUN npm install && npm run build
 
 # Permisos para Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Configurar Apache para servir /public
 RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
