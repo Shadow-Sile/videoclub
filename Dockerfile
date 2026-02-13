@@ -1,5 +1,5 @@
 # Imagen base con PHP 8.3 + Apache
-FROM php:8.3-apache
+FROM php:8.5-apache
 
 # Instalar dependencias del sistema Y git (importante)
 RUN apt-get update && apt-get install -y \
