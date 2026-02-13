@@ -34,6 +34,14 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Instalar dependencias PHP con Composer
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
+# ...todo lo que ya tienes arriba
+
+# Instalar Node.js y npm (Node 20 LTS)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 # Instalar dependencias Node y compilar assets
 RUN npm install && npm run build
 
